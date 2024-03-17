@@ -12,6 +12,7 @@
     <modules>
         <module>openai</module>
         <module>spring-ai-mongodb</module>
+        <module>spring-mongodb-vector-search</module>
     </modules>
 
     <properties>
