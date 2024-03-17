@@ -1,7 +1,12 @@
 package com.example.mdbvectorsearch.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
+@NoArgsConstructor
+@Data
 public class EmbeddingResponse {
     private List<EmbeddingData> data;
 
@@ -9,11 +14,4 @@ public class EmbeddingResponse {
         return data.get(0).getEmbedding();
     }
 
-    public List<EmbeddingData> getData() {
-        return data;
-    }
-
-    public void setData(List<EmbeddingData> data) {
-        this.data = data;
-    }
 }

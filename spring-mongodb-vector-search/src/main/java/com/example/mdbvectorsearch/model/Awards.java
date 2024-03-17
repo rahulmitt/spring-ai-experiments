@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class Imdb {
-    private double rating;
-    private int votes;
-    private int id;
+public class Awards {
+    private int wins;
+    private int nominations;
+    private String text;
 }
