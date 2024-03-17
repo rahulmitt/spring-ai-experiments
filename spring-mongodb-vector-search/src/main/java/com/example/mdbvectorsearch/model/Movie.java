@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @NoArgsConstructor
@@ -21,7 +21,7 @@ public class Movie {
     private String title;
     private String fullplot;
     private List<String> languages;
-    private Date released;
+    private LocalDate released;
     private List<String> directors;
     private String rated;
     private Awards awards;
