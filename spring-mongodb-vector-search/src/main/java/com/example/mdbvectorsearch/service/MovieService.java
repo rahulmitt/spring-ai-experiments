@@ -11,16 +11,16 @@ import java.util.List;
 public class MovieService {
 
     private final MovieRepository movieRepository;
-    private final OpenAIService embedder;
+    private final OpenAIService openAiService;
 
     @Autowired
-    public MovieService(MovieRepository movieRepository, OpenAIService embedder) {
+    public MovieService(MovieRepository movieRepository, OpenAIService openAiService) {
         this.movieRepository = movieRepository;
-        this.embedder = embedder;
+        this.openAiService = openAiService;
     }
 
     public List<Movie> getMoviesSemanticSearch(String plotDescription) {
-        List<Double> embedding =  embedder.createEmbedding(plotDescription);
+        List<Double> embedding =  openAiService.createEmbedding(plotDescription);
         return movieRepository.findMoviesByVector(embedding);
     }
 }

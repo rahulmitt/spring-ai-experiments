@@ -28,10 +28,6 @@ public class MovieRepositoryImpl implements MovieRepository {
         this.mongoDatabase = mongoDatabase;
     }
 
-    private MongoCollection<Movie> getMovieCollection() {
-        return mongoDatabase.getCollection("embedded_movies", Movie.class);
-    }
-
     @Override
     public List<Movie> findMoviesByVector(List<Double> embedding) {
         int numCandidates = 100;
@@ -52,5 +48,9 @@ public class MovieRepositoryImpl implements MovieRepository {
         }
 
         return movieList;
+    }
+
+    private MongoCollection<Movie> getMovieCollection() {
+        return mongoDatabase.getCollection("embedded_movies", Movie.class);
     }
 }
