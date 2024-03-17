@@ -1,13 +1,11 @@
 package com.example.mdbvectorsearch.service;
 
 import com.example.mdbvectorsearch.model.EmbeddingResponse;
-import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -20,30 +18,22 @@ public class OpenAIService {
     @Value("${openai.api.key}")
     private String OPENAI_API_KEY;
 
-    private WebClient webClient;
+    private RestTemplate restTemplate = new RestTemplate();
 
-    @PostConstruct
-    void init() {
-        this.webClient = WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector())
-                .baseUrl(OPENAI_API_URL)
-                .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .defaultHeader("Authorization", "Bearer " + OPENAI_API_KEY)
-                .build();
-    }
-
-
-    public Mono<List<Double>> createEmbedding(String text) {
+    public List<Double> createEmbedding(String text) {
         Map<String, Object> body = Map.of(
                 "model", "text-embedding-ada-002",
                 "input", text
         );
 
-        return webClient.post()
-                .uri("/v1/embeddings")
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(EmbeddingResponse.class)
-                .map(EmbeddingResponse::getEmbedding);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(OPENAI_API_KEY);
+        headers.set("model", "text-embedding-ada-002");
+        headers.set("input", text);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<EmbeddingResponse> exchange = restTemplate.exchange(OPENAI_API_URL + "/v1/embeddings", HttpMethod.POST, entity, EmbeddingResponse.class);
+        return exchange.getBody().getEmbedding();
     }
 }

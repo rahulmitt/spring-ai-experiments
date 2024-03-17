@@ -4,7 +4,6 @@ import com.example.mdbvectorsearch.model.Movie;
 import com.example.mdbvectorsearch.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -20,9 +19,8 @@ public class MovieService {
         this.embedder = embedder;
     }
 
-    public Mono<List<Movie>> getMoviesSemanticSearch(String plotDescription) {
-        return embedder.createEmbedding(plotDescription)
-                .flatMapMany(movieRepository::findMoviesByVector)
-                .collectList();
+    public List<Movie> getMoviesSemanticSearch(String plotDescription) {
+        List<Double> embedding =  embedder.createEmbedding(plotDescription);
+        return movieRepository.findMoviesByVector(embedding);
     }
 }
