@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 @RestController
 public class MovieController {
 
-    private final VectorStore mongoDBAtlasVectorStore;
+    private final VectorStore mongoDbVectorStore;
     private final ChatClient chatClient;
 
     @Autowired
-    public MovieController(VectorStore mongoDBAtlasVectorStore, ChatClient chatClient) {
-        this.mongoDBAtlasVectorStore = mongoDBAtlasVectorStore;
+    public MovieController(VectorStore mongoDbVectorStore, ChatClient chatClient) {
+        this.mongoDbVectorStore = mongoDbVectorStore;
         this.chatClient = chatClient;
     }
 
@@ -38,7 +38,7 @@ public class MovieController {
     public ResponseEntity<Movie> searchMovieByPlot(@RequestParam("plotDescription") String plotDescription) {
         BeanOutputParser<Movie> parser = new BeanOutputParser<>(Movie.class);
 
-        List<Document> documents = this.mongoDBAtlasVectorStore.similaritySearch(plotDescription);
+        List<Document> documents = this.mongoDbVectorStore.similaritySearch(plotDescription);
         String inlined = documents.stream().map(Document::getContent).collect(Collectors.joining(System.lineSeparator()));
 
         String promptString = """
@@ -60,7 +60,7 @@ public class MovieController {
     public ResponseEntity<Map<String, String>> performSemanticSearch(@RequestParam("plotDescription") String plotDescription) {
         UserMessage userMessage = new UserMessage(plotDescription);
 
-        List<Document> documents = this.mongoDBAtlasVectorStore.similaritySearch(plotDescription);
+        List<Document> documents = this.mongoDbVectorStore.similaritySearch(plotDescription);
         String inlined = documents.stream().map(Document::getContent).collect(Collectors.joining(System.lineSeparator()));
 
         Message similarDocsMessage = new SystemPromptTemplate("Based on the following: {documents}")

@@ -15,7 +15,8 @@ import org.springframework.ai.openai.OpenAiImageClient;
 import org.springframework.ai.openai.api.OpenAiImageApi;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
-import org.springframework.ai.vectorstore.MongoDBAtlasVectorStore;
+import org.springframework.ai.vectorstore.MongoDBVectorStoreConfig;
+import org.springframework.ai.vectorstore.MongoDbVectorStore;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,18 +88,14 @@ public class CricketWorldCupConfig {
     }
 
     @Bean
-    public VectorStore mongoDBAtlasVectorStore(MongoTemplate mongoTemplate, EmbeddingClient embeddingClient) {
-        return new MongoDBAtlasVectorStore(mongoTemplate, embeddingClient,
-                MongoDBAtlasVectorStore.MongoDBVectorStoreConfig.builder()
-                        .withCollectionName(collectionName)
-                        .withPathName(searchField)
-                        .withVectorIndexName(vectorIndexName)
-                        .build());
+    public VectorStore mongoDbVectorStore(MongoTemplate mongoTemplate, EmbeddingClient embeddingClient) {
+        return new MongoDbVectorStore(mongoTemplate, embeddingClient, MongoDBVectorStoreConfig.builder()
+                .collectionName(collectionName)
+                .pathName(searchField)
+                .vectorIndexName(vectorIndexName)
+                .numCandidates(200)
+                .build());
     }
-
-
-
-
 
     @Bean
     public ImageClient imageClient(@Value("${spring.ai.openai.api-key}") String apiKey) {
