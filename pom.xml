@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>openai</module>
+        <module>spring-openai</module>
         <module>spring-ai-mongodb</module>
         <module>spring-mongodb-vector-search</module>
     </modules>

@@ -1,4 +1,4 @@
-package com.example.mdbvectorsearch.model;
+package com.interviewpedia.spring.ai.openai.movie.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

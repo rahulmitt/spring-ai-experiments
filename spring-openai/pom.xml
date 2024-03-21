@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>openai</artifactId>
+    <artifactId>spring-openai</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -32,6 +32,12 @@
             <version>${spring-ai-version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.interviewpedia.spring.ai</groupId>
+            <artifactId>spring-ai-mongodb</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
         <!--
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -49,6 +55,13 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
             <version>${spring-ai-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
