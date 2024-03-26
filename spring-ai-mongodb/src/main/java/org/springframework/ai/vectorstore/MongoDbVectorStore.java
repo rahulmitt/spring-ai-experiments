@@ -1,6 +1,7 @@
 package org.springframework.ai.vectorstore;
 
 import com.mongodb.BasicDBObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingClient;
 import org.springframework.beans.factory.InitializingBean;
@@ -14,13 +15,10 @@ import java.util.*;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
+@Slf4j
 public class MongoDbVectorStore implements VectorStore, InitializingBean {
 
     public static final String ID_FIELD_NAME = "_id";
-
-    public static final String METADATA_FIELD_NAME = "metadata";
-
-    public static final String CONTENT_FIELD_NAME = "content";
 
     public static final String SCORE_FIELD_NAME = "score";
 
@@ -45,20 +43,17 @@ public class MongoDbVectorStore implements VectorStore, InitializingBean {
             mongoTemplate.createCollection(this.config.getCollectionName());
         }
 
-        // https://www.mongodb.com/community/forums/t/how-to-create-vector-search-index-using-java/263756
-        // mongoTemplate.executeCommand(createSearchIndex());
+        org.bson.Document searchIndex = createSearchIndex();
+        // https://www.mongodb.com/community/forums/t/createsearchindexes-gives-mongocommandexception-in-java-code/272973
+        // mongoTemplate.executeCommand(searchIndex);
     }
 
     private org.bson.Document createSearchIndex() {
         List<org.bson.Document> vectorFields = new ArrayList<>();
-        vectorFields.add(new org.bson.Document().append("type", "vector")
+        vectorFields.add(new org.bson.Document().append("type", "knnVector")
                 .append("path", this.config.getPathName())
-                .append("numDimensions", 1536)
+                .append("dimensions", 1536)
                 .append("similarity", "cosine"));
-
-        vectorFields.addAll(this.config.getMetadataFieldsToFilter().stream()
-                .map(fieldName -> new org.bson.Document().append("type", "filter")
-                        .append("path", "metadata." + fieldName)).toList());
 
         return new org.bson.Document()
                 .append("createSearchIndexes", this.config.getCollectionName())
@@ -71,8 +66,6 @@ public class MongoDbVectorStore implements VectorStore, InitializingBean {
     @SuppressWarnings("unchecked")
     private Document mapBasicDbObject(BasicDBObject basicDBObject) {
         String id = basicDBObject.getString(ID_FIELD_NAME);
-        String content = basicDBObject.getString(CONTENT_FIELD_NAME);
-        Map<String, Object> metadata = (Map<String, Object>) basicDBObject.get(METADATA_FIELD_NAME);
         List<Double> embedding = (List<Double>) basicDBObject.get(this.config.getPathName());
 
         Document document = new Document(id, basicDBObject.toJson(), Collections.emptyMap());
@@ -84,6 +77,7 @@ public class MongoDbVectorStore implements VectorStore, InitializingBean {
     @Override
     public void add(List<Document> documents) {
         for (Document document : documents) {
+            log.info("Calling EmbeddingClient for document id = {}", document.getId());
             List<Double> embedding = this.embeddingClient.embed(document);
             document.setEmbedding(embedding);
             this.mongoTemplate.save(document, this.config.getCollectionName());
@@ -105,6 +99,7 @@ public class MongoDbVectorStore implements VectorStore, InitializingBean {
         return similaritySearch(SearchRequest.query(query).withTopK(1));
     }
 
+    // https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-stage/
     @Override
     public List<Document> similaritySearch(SearchRequest request) {
         List<Double> queryEmbedding = this.embeddingClient.embed(request.getQuery());

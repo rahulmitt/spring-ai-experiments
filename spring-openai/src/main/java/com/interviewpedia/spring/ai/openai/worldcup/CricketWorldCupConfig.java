@@ -67,11 +67,6 @@ public class CricketWorldCupConfig {
     }
 
     @Bean
-    public MongoDatabase mongoDatabase(MongoClient mongoClient) {
-        return mongoClient.getDatabase(databaseName);
-    }
-
-    @Bean
     public MongoTemplate mongoTemplate(MongoClient mongoClient) {
         return new MongoTemplate(mongoClient, databaseName);
     }
@@ -89,12 +84,19 @@ public class CricketWorldCupConfig {
 
     @Bean
     public VectorStore mongoDbVectorStore(MongoTemplate mongoTemplate, EmbeddingClient embeddingClient) {
-        return new MongoDbVectorStore(mongoTemplate, embeddingClient, MongoDBVectorStoreConfig.builder()
+        VectorStore vectorStore = new MongoDbVectorStore(mongoTemplate, embeddingClient, MongoDBVectorStoreConfig.builder()
                 .collectionName(collectionName)
                 .pathName(searchField)
                 .vectorIndexName(vectorIndexName)
                 .numCandidates(200)
                 .build());
+
+        Resource pdf = resourceLoader.getResource("classpath:Cricket_World_Cup.pdf");
+        Supplier<List<Document>> reader = new PagePdfDocumentReader(pdf);
+        Function<List<Document>, List<Document>> splitter = new TokenTextSplitter();
+        List<Document> documents = splitter.apply(reader.get());
+        vectorStore.accept(documents);
+        return vectorStore;
     }
 
     @Bean

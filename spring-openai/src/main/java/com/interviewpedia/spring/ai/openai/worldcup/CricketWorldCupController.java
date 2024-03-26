@@ -17,20 +17,23 @@ import java.util.stream.Collectors;
 
 @RestController
 public class CricketWorldCupController {
+    private final VectorStore mongoDbVectorStore;
+
     private final VectorStore simpleVectorStore;
 
     private final ChatClient chatClient;
 
     @Autowired
-    public CricketWorldCupController(ChatClient chatClient, VectorStore simpleVectorStore) {
+    public CricketWorldCupController(ChatClient chatClient, VectorStore mongoDbVectorStore, VectorStore simpleVectorStore) {
         this.chatClient = chatClient;
+        this.mongoDbVectorStore = mongoDbVectorStore;
         this.simpleVectorStore = simpleVectorStore;
     }
 
     @GetMapping("/ai/cricket-world-cup")
     public Map<String, String> completion(@RequestParam(value = "message") String message) {
 
-        var documents = this.simpleVectorStore.similaritySearch(message);
+        var documents = this.mongoDbVectorStore.similaritySearch(message);
         var inlined = documents.stream().map(Document::getContent).collect(Collectors.joining(System.lineSeparator()));
         var similarDocsMessage = new SystemPromptTemplate("Based on the following: {documents}")
                 .createMessage(Map.of("documents", inlined));
