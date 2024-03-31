@@ -13,6 +13,7 @@
         <module>spring-openai</module>
         <module>spring-ai-mongodb</module>
         <module>spring-mongodb-vector-search</module>
+        <module>spring-ai-hana-cloud</module>
     </modules>
 
     <properties>
