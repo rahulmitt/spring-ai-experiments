@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class HanaCloudVectorStore implements VectorStore {
-
     private final HanaVectorRepository<? extends HanaVectorEntity> repository;
     private final EmbeddingClient embeddingClient;
 
@@ -38,12 +37,14 @@ public class HanaCloudVectorStore implements VectorStore {
 
     @Override
     public Optional<Boolean> delete(List<String> idList) {
-        long deleteCount = repository.deleteAllById(idList);
+        int deleteCount = repository.deleteEmbeddingsById(idList);
+        log.info("{} embeddings deleted", deleteCount);
         return Optional.of(deleteCount == idList.size());
     }
 
     public void purgeEmbeddings() {
         repository.deleteAllEmbeddings();
+        log.info("All embeddings deleted");
     }
 
     @Override
@@ -54,7 +55,7 @@ public class HanaCloudVectorStore implements VectorStore {
     @Override
     public List<Document> similaritySearch(SearchRequest request) {
         String queryEmbedding = getEmbedding(request);
-        List<? extends HanaVectorEntity> searchResult = repository.similaritySearch(request.getTopK(), queryEmbedding);
+        List<? extends HanaVectorEntity> searchResult = repository.cosineSimilaritySearch(request.getTopK(), queryEmbedding);
         log.info("Hana cosine-similarity returned {} results for topK={}", searchResult.size(), request.getTopK());
         return searchResult.stream()
                 .map(c -> {
@@ -68,12 +69,14 @@ public class HanaCloudVectorStore implements VectorStore {
     }
 
     private String getEmbedding(SearchRequest searchRequest) {
-        return "[" + this.embeddingClient.embed(searchRequest.getQuery()).stream().map(String::valueOf)
+        return "[" + this.embeddingClient.embed(searchRequest.getQuery()).stream()
+                .map(String::valueOf)
                 .collect(Collectors.joining(", ")) + "]";
     }
 
     private String getEmbedding(Document document) {
-        return "[" + this.embeddingClient.embed(document).stream().map(String::valueOf)
+        return "[" + this.embeddingClient.embed(document).stream()
+                .map(String::valueOf)
                 .collect(Collectors.joining(", ")) + "]";
     }
 }

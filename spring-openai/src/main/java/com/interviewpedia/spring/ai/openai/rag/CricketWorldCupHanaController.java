@@ -39,21 +39,22 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CricketWorldCupHanaController {
     private final VectorStore hanaCloudVectorStore;
-
     private final ChatClient chatClient;
+    private final OpenAiAudioSpeechClient openAiAudioSpeechClient;
 
     @Autowired
-    private OpenAiAudioSpeechClient openAiAudioSpeechClient;
-
-    @Autowired
-    public CricketWorldCupHanaController(ChatClient chatClient, VectorStore hanaCloudVectorStore) {
+    public CricketWorldCupHanaController(ChatClient chatClient,
+                                         VectorStore hanaCloudVectorStore,
+                                         OpenAiAudioSpeechClient openAiAudioSpeechClient) {
         this.chatClient = chatClient;
         this.hanaCloudVectorStore = hanaCloudVectorStore;
+        this.openAiAudioSpeechClient = openAiAudioSpeechClient;
     }
 
     @PostMapping("/ai/hana-vector-store/cricket-world-cup/purge-embeddings")
     public ResponseEntity<String> purgeEmbeddings() {
         ((HanaCloudVectorStore) this.hanaCloudVectorStore).purgeEmbeddings();
+        log.info("All embeddings purged from CRICKET_WORLD_CUP table in Hana DB");
         return ResponseEntity.ok().body("All embeddings purged from CRICKET_WORLD_CUP table in Hana DB");
     }
 
@@ -78,7 +79,9 @@ public class CricketWorldCupHanaController {
 
         var userMessage = new UserMessage(message);
         Prompt prompt = new Prompt(List.of(similarDocsMessage, userMessage));
-        return Map.of("generation", chatClient.call(prompt).getResult().getOutput().getContent());
+        String generation = chatClient.call(prompt).getResult().getOutput().getContent();
+        log.info("Generation: {}", generation);
+        return Map.of("generation", generation);
     }
 
     @GetMapping("/ai/hana-vector-store/cricket-world-cup/text-to-speech")
@@ -103,6 +106,7 @@ public class CricketWorldCupHanaController {
         SpeechPrompt speechPrompt = new SpeechPrompt(textResponse, speechOptions);
         SpeechResponse response = openAiAudioSpeechClient.call(speechPrompt);
         byte[] audioBytes = response.getResult().getOutput();
+        log.info("Speech response generated");
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.parseMediaType("audio/mpeg"))
                 .header("Accept-Ranges", "bytes")
                 .body(Arrays.copyOfRange(audioBytes, 0, audioBytes.length));

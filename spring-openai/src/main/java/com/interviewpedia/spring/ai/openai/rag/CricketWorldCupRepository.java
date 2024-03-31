@@ -20,7 +20,7 @@ public interface CricketWorldCupRepository extends HanaVectorRepository<CricketW
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM CRICKET_WORLD_CUP WHERE _ID IN (:ids)", nativeQuery = true)
-    int deleteAllById(@Param("ids") List<String> idList);
+    int deleteEmbeddingsById(@Param("ids") List<String> idList);
 
     @Modifying
     @Transactional
@@ -29,6 +29,6 @@ public interface CricketWorldCupRepository extends HanaVectorRepository<CricketW
 
     @Query(value = "SELECT TOP :topK * FROM CRICKET_WORLD_CUP ORDER BY COSINE_SIMILARITY(" +
             "EMBEDDING, TO_REAL_VECTOR(:queryEmbedding)) DESC", nativeQuery = true)
-    List<CricketWorldCup> similaritySearch(@Param("topK") int topK,
+    List<CricketWorldCup> cosineSimilaritySearch(@Param("topK") int topK,
                              @Param("queryEmbedding") String queryEmbedding);
 }
