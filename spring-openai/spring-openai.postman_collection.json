@@ -1,0 +1,90 @@
+{
+	"info": {
+		"_postman_id": "0d0ebdd0-f9f3-4fad-96a0-51e495273add",
+		"name": "spring-ai",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "cricket-world-cup",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ai/hana-vector-store/cricket-world-cup?message=\"Give me a summary of the 2023 cricket world cup finals?\"",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ai",
+						"hana-vector-store",
+						"cricket-world-cup"
+					],
+					"query": [
+						{
+							"key": "message",
+							"value": "\"Give me a summary of the 2023 cricket world cup finals?\""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cricket-world-cup/upload",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "pdf",
+							"type": "file",
+							"src": "/D:/_QuickAccess/dev/git_repos/spring-ai-experiments/spring-openai/src/main/resources/Cricket_World_Cup.pdf"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/ai/hana-vector-store/cricket-world-cup/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ai",
+						"hana-vector-store",
+						"cricket-world-cup",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cricket-world-cup/purge-embeddings",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ai/hana-vector-store/cricket-world-cup/purge-embeddings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ai",
+						"hana-vector-store",
+						"cricket-world-cup",
+						"purge-embeddings"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
