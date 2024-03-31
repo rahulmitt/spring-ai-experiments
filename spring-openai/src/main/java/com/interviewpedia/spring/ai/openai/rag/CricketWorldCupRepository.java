@@ -15,7 +15,7 @@ public interface CricketWorldCupRepository extends HanaVectorRepository<CricketW
     @Transactional
     @Query(value = "INSERT INTO CRICKET_WORLD_CUP(_ID, EMBEDDING, CONTENT) VALUES " +
             "(:_id, TO_REAL_VECTOR(:embedding), :content)", nativeQuery = true)
-    int save(@Param("_id") String id, @Param("embedding") String embedding, @Param("content") String content);
+    void save(@Param("_id") String id, @Param("embedding") String embedding, @Param("content") String content);
 
     @Modifying
     @Transactional

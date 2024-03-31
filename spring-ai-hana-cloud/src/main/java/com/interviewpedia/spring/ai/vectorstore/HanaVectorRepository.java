@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface HanaVectorRepository<T> extends JpaRepository<T, String> {
-    int save(@Param("_id") String id, @Param("embedding") String embedding, @Param("content") String content);
+    void save(@Param("_id") String id, @Param("embedding") String embedding, @Param("content") String content);
 
     int deleteEmbeddingsById(@Param("ids") List<String> idList);
 
