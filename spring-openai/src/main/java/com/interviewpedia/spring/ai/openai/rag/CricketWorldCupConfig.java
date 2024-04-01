@@ -1,6 +1,7 @@
 package com.interviewpedia.spring.ai.openai.rag;
 
 import com.interviewpedia.spring.ai.vectorstore.HanaCloudVectorStore;
+import com.interviewpedia.spring.ai.vectorstore.HanaCloudVectorStoreConfig;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -43,6 +44,12 @@ public class CricketWorldCupConfig {
     @Value("${mongodb.collection.index-name}")
     String vectorIndexName;
 
+    @Value("${hana.table.name}")
+    private String tableName;
+
+    @Value("${hana.similarity.search.topK}")
+    private int topK;
+
     @Bean
     public MongoClient mongoClient() {
         CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(
@@ -79,9 +86,13 @@ public class CricketWorldCupConfig {
     }
 
     @Bean
-    public VectorStore hanaCloudVectorStore(CricketWorldCupRepository repository,
+    public VectorStore hanaCloudVectorStore(CricketWorldCupRepository cricketWorldCupRepository,
                                             EmbeddingClient embeddingClient) {
-        return new HanaCloudVectorStore(repository, embeddingClient);
+        return new HanaCloudVectorStore(cricketWorldCupRepository, embeddingClient,
+                HanaCloudVectorStoreConfig.builder()
+                        .tableName(tableName)
+                        .topK(topK)
+                        .build());
     }
 
     @Bean

@@ -17,10 +17,14 @@ public class HanaCloudVectorStore implements VectorStore {
     private final HanaVectorRepository<? extends HanaVectorEntity> repository;
     private final EmbeddingClient embeddingClient;
 
+    private final HanaCloudVectorStoreConfig config;
+
     public HanaCloudVectorStore(HanaVectorRepository<? extends HanaVectorEntity> repository,
-                                EmbeddingClient embeddingClient) {
+                                EmbeddingClient embeddingClient,
+                                HanaCloudVectorStoreConfig config) {
         this.repository = repository;
         this.embeddingClient = embeddingClient;
+        this.config = config;
     }
 
     @Override
@@ -30,32 +34,33 @@ public class HanaCloudVectorStore implements VectorStore {
             log.info("[{}/{}] Calling EmbeddingClient for document id = {}", count++, documents.size(), document.getId());
             String content = document.getContent().replaceAll("\\s+", " ");
             String embedding = getEmbedding(document);
-            repository.save(document.getId(), embedding, content);
+            repository.save(config.getTableName(), document.getId(), embedding, content);
         }
         log.info("Embeddings saved in HanaCloudVectorStore for {} documents", count - 1);
     }
 
     @Override
     public Optional<Boolean> delete(List<String> idList) {
-        int deleteCount = repository.deleteEmbeddingsById(idList);
+        int deleteCount = repository.deleteEmbeddingsById(config.getTableName(),  idList);
         log.info("{} embeddings deleted", deleteCount);
         return Optional.of(deleteCount == idList.size());
     }
 
-    public void purgeEmbeddings() {
-        repository.deleteAllEmbeddings();
-        log.info("All embeddings deleted");
+    public int purgeEmbeddings() {
+        int deleteCount = repository.deleteAllEmbeddings(config.getTableName());
+        log.info("{} embeddings deleted", deleteCount);
+        return deleteCount;
     }
 
     @Override
     public List<Document> similaritySearch(String query) {
-        return similaritySearch(SearchRequest.query(query).withTopK(1));
+        return similaritySearch(SearchRequest.query(query).withTopK(config.getTopK()));
     }
 
     @Override
     public List<Document> similaritySearch(SearchRequest request) {
         String queryEmbedding = getEmbedding(request);
-        List<? extends HanaVectorEntity> searchResult = repository.cosineSimilaritySearch(request.getTopK(), queryEmbedding);
+        List<? extends HanaVectorEntity> searchResult = repository.cosineSimilaritySearch(config.getTableName(), request.getTopK(), queryEmbedding);
         log.info("Hana cosine-similarity returned {} results for topK={}", searchResult.size(), request.getTopK());
         return searchResult.stream()
                 .map(c -> {

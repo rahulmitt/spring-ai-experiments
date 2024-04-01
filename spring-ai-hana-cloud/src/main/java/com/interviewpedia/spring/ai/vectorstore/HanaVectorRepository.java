@@ -1,16 +1,13 @@
 package com.interviewpedia.spring.ai.vectorstore;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
-
 import java.util.List;
 
-public interface HanaVectorRepository<T> extends JpaRepository<T, String> {
-    void save(@Param("_id") String id, @Param("embedding") String embedding, @Param("content") String content);
+public interface HanaVectorRepository<T> {
+    void save(String tableName, String id, String embedding, String content);
 
-    int deleteEmbeddingsById(@Param("ids") List<String> idList);
+    int deleteEmbeddingsById(String tableName, List<String> idList);
 
-    void deleteAllEmbeddings();
+    int deleteAllEmbeddings(String tableName);
 
-    List<T> cosineSimilaritySearch(@Param("topK") int topK, @Param("queryEmbedding") String queryEmbedding);
+    List<T> cosineSimilaritySearch(String tableName, int topK, String queryEmbedding);
 }

@@ -1,34 +1,65 @@
 package com.interviewpedia.spring.ai.openai.rag;
 
 import com.interviewpedia.spring.ai.vectorstore.HanaVectorRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface CricketWorldCupRepository extends HanaVectorRepository<CricketWorldCup> {
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO CRICKET_WORLD_CUP(_ID, EMBEDDING, CONTENT) VALUES " +
-            "(:_id, TO_REAL_VECTOR(:embedding), :content)", nativeQuery = true)
-    void save(@Param("_id") String id, @Param("embedding") String embedding, @Param("content") String content);
+public class CricketWorldCupRepository implements HanaVectorRepository<CricketWorldCup> {
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    @Modifying
+    @Override
     @Transactional
-    @Query(value = "DELETE FROM CRICKET_WORLD_CUP WHERE _ID IN (:ids)", nativeQuery = true)
-    int deleteEmbeddingsById(@Param("ids") List<String> idList);
+    public void save(String tableName, String id, String embedding, String content) {
+        String sql = String.format("""
+                INSERT INTO %s (_ID, EMBEDDING, CONTENT)
+                VALUES(:_id, TO_REAL_VECTOR(:embedding), :content)
+                """, tableName);
 
-    @Modifying
+        entityManager.createNativeQuery(sql)
+                .setParameter("_id", id)
+                .setParameter("embedding", embedding)
+                .setParameter("content", content)
+                .executeUpdate();
+    }
+
+    @Override
     @Transactional
-    @Query(value = "TRUNCATE TABLE CRICKET_WORLD_CUP", nativeQuery = true)
-    void deleteAllEmbeddings();
+    public int deleteEmbeddingsById(String tableName, List<String> idList) {
+        String sql = String.format("""
+                DELETE FROM %s WHERE _ID IN (:ids)
+                """, tableName);
 
-    @Query(value = "SELECT TOP :topK * FROM CRICKET_WORLD_CUP ORDER BY COSINE_SIMILARITY(" +
-            "EMBEDDING, TO_REAL_VECTOR(:queryEmbedding)) DESC", nativeQuery = true)
-    List<CricketWorldCup> cosineSimilaritySearch(@Param("topK") int topK,
-                             @Param("queryEmbedding") String queryEmbedding);
+        return entityManager.createNativeQuery(sql)
+                .setParameter("ids", idList)
+                .executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public int deleteAllEmbeddings(String tableName) {
+        String sql = String.format("""
+                DELETE FROM %s
+                """, tableName);
+
+        return entityManager.createNativeQuery(sql).executeUpdate();
+    }
+
+    @Override
+    public List<CricketWorldCup> cosineSimilaritySearch(String tableName, int topK, String queryEmbedding) {
+        String sql = String.format("""
+                SELECT TOP :topK * FROM %s
+                ORDER BY COSINE_SIMILARITY(EMBEDDING, TO_REAL_VECTOR(:queryEmbedding)) DESC
+                """, tableName);
+
+        return entityManager.createNativeQuery(sql, CricketWorldCup.class)
+                .setParameter("topK", topK)
+                .setParameter("queryEmbedding", queryEmbedding)
+                .getResultList();
+    }
 }
