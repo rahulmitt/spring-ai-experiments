@@ -1,9 +1,9 @@
 package com.interviewpedia.spring.ai.openai.rag;
 
-import com.interviewpedia.spring.ai.vectorstore.HanaVectorRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import org.springframework.ai.vectorstore.HanaVectorRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

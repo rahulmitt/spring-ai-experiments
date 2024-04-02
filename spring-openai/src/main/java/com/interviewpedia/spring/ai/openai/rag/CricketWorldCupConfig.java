@@ -1,7 +1,5 @@
 package com.interviewpedia.spring.ai.openai.rag;
 
-import com.interviewpedia.spring.ai.vectorstore.HanaCloudVectorStore;
-import com.interviewpedia.spring.ai.vectorstore.HanaCloudVectorStoreConfig;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -13,6 +11,8 @@ import org.springframework.ai.embedding.EmbeddingClient;
 import org.springframework.ai.image.ImageClient;
 import org.springframework.ai.openai.OpenAiImageClient;
 import org.springframework.ai.openai.api.OpenAiImageApi;
+import org.springframework.ai.vectorstore.HanaCloudVectorStore;
+import org.springframework.ai.vectorstore.HanaCloudVectorStoreConfig;
 import org.springframework.ai.vectorstore.MongoDBVectorStoreConfig;
 import org.springframework.ai.vectorstore.MongoDbVectorStore;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
